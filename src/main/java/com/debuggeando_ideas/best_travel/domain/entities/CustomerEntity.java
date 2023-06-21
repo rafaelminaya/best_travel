@@ -29,7 +29,7 @@ public class CustomerEntity {
     @EqualsAndHashCode.Exclude
     @OneToMany(
             cascade = CascadeType.ALL,
-            fetch = FetchType.EAGER,
+            fetch = FetchType.LAZY, // LAZY para permitir el "delete" luego del "decrease" en el "TourService", "ReservationService" y "TicketService"
             orphanRemoval = true,
             mappedBy = "customer" // relación bidireccional con el atributo "customer" de la clase "TicketEntity"
     )
@@ -40,7 +40,7 @@ public class CustomerEntity {
     @EqualsAndHashCode.Exclude
     @OneToMany(
             cascade = CascadeType.ALL,
-            fetch = FetchType.EAGER,
+            fetch = FetchType.LAZY, // LAZY para permitir el "delete" luego del "decrease" en el "TourService", "ReservationService" y "TicketService"
             orphanRemoval = true,
             mappedBy = "customer" // relación bidireccional con el atributo "customer" de la clase "ReservationEntity"
     )
