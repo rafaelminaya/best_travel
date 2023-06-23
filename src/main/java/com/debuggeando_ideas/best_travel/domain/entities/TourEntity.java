@@ -3,6 +3,7 @@ package com.debuggeando_ideas.best_travel.domain.entities;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
@@ -13,7 +14,7 @@ import java.util.UUID;
 @AllArgsConstructor
 @Data
 @Builder
-public class TourEntity {
+public class TourEntity implements Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

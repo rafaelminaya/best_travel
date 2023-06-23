@@ -1,6 +1,6 @@
 package com.debuggeando_ideas.best_travel.api.models.reponses;
 
-import com.debuggeando_ideas.best_travel.util.AeroLine;
+import com.debuggeando_ideas.best_travel.util.enums.AeroLine;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

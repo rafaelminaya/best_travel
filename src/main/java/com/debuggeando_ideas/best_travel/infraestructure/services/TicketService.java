@@ -8,8 +8,11 @@ import com.debuggeando_ideas.best_travel.domain.repositories.CustomerRepository;
 import com.debuggeando_ideas.best_travel.domain.repositories.FlyRepository;
 import com.debuggeando_ideas.best_travel.domain.repositories.TicketRepository;
 import com.debuggeando_ideas.best_travel.infraestructure.abstract_services.ITicketService;
+import com.debuggeando_ideas.best_travel.infraestructure.helpers.BlackListHelper;
 import com.debuggeando_ideas.best_travel.infraestructure.helpers.CustomerHelper;
 import com.debuggeando_ideas.best_travel.util.BestTravelUtil;
+import com.debuggeando_ideas.best_travel.util.enums.Tables;
+import com.debuggeando_ideas.best_travel.util.exceptions.IdNotFoundException;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
@@ -30,13 +33,16 @@ public class TicketService implements ITicketService {
     private final CustomerRepository customerRepository;
     private final TicketRepository ticketRepository;
     private final CustomerHelper customerHelper;
+    private final BlackListHelper blackListHelper;
 
     @Override
     public TicketResponse create(TicketRequest request) {
+        // Método validador que se encarga de verificar si el cliente está en la "lista negra" de no poder hacer transacciones
+        blackListHelper.isInBlackListCustomer(request.getIdClient());
         // Obtenemos el vuelo
-        var fly = flyRepository.findById(request.getIdFly()).orElseThrow();
+        var fly = flyRepository.findById(request.getIdFly()).orElseThrow(() -> new IdNotFoundException(Tables.fly.name()));
         // Obtenemos el cliente
-        var customer = customerRepository.findById(request.getIdClient()).orElseThrow();
+        var customer = customerRepository.findById(request.getIdClient()).orElseThrow(() -> new IdNotFoundException(Tables.customer.name()));
         // instanciamos el ticket que contiene al "vuelo" y "cliente" obtenidos
         var ticketToPersist = TicketEntity.builder()
                 .id(UUID.randomUUID())
@@ -60,7 +66,7 @@ public class TicketService implements ITicketService {
 
     @Override
     public TicketResponse read(UUID uuid) {
-        var ticketFromDB = ticketRepository.findById(uuid).orElseThrow();
+        var ticketFromDB = ticketRepository.findById(uuid).orElseThrow(() -> new IdNotFoundException(Tables.ticket.name()));
 
         return this.entityToResponse(ticketFromDB);
     }
@@ -68,9 +74,9 @@ public class TicketService implements ITicketService {
     @Override
     public TicketResponse update(TicketRequest request, UUID uuid) {
         // obtenemos el ticket a actualizar
-        var ticketToUpdate = ticketRepository.findById(uuid).orElseThrow();
+        var ticketToUpdate = ticketRepository.findById(uuid).orElseThrow(() -> new IdNotFoundException(Tables.ticket.name()));
         // obtenemos el vuelo
-        var fly = flyRepository.findById(request.getIdFly()).orElseThrow();
+        var fly = flyRepository.findById(request.getIdFly()).orElseThrow(() -> new IdNotFoundException(Tables.fly.name()));
         // actualizamos la información del ticket
         ticketToUpdate.setFly(fly);
         ticketToUpdate.setPrice(fly.getPrice().add(fly.getPrice().multiply(charge_price_percentage)));// Asignamos el 25% adicional del precio del vuelo
@@ -86,7 +92,7 @@ public class TicketService implements ITicketService {
     @Override
     public void delete(UUID uuid) {
         // Obtenemos el ticket a eliminar
-        var ticketToDelete = ticketRepository.findById(uuid).orElseThrow();
+        var ticketToDelete = ticketRepository.findById(uuid).orElseThrow(() -> new IdNotFoundException(Tables.ticket.name()));
         // invocamos al método que actualiza los totales de "fly", "reservations" y "tours" del customer
         customerHelper.decrease(ticketToDelete.getCustomer().getDni(), TicketService.class);
         // persistimos el objeto en la base de datos
@@ -95,7 +101,7 @@ public class TicketService implements ITicketService {
 
     @Override
     public BigDecimal findPrice(Long flyId) {
-        var fly = flyRepository.findById(flyId).orElseThrow();
+        var fly = flyRepository.findById(flyId).orElseThrow(() -> new IdNotFoundException(Tables.fly.name()));
         return fly.getPrice().add(fly.getPrice().multiply(charge_price_percentage)); // Asignamos el 25% adicional del precio del vuelo
     }
 

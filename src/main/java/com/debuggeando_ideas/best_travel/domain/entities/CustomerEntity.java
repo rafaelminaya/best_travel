@@ -3,6 +3,7 @@ package com.debuggeando_ideas.best_travel.domain.entities;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.io.Serializable;
 import java.util.Set;
 
 @Entity(name = "customer")
@@ -10,7 +11,7 @@ import java.util.Set;
 @AllArgsConstructor
 @Data
 @Builder
-public class CustomerEntity {
+public class CustomerEntity implements Serializable {
 
     @Id
     private String dni;

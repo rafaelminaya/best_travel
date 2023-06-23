@@ -3,6 +3,7 @@ package com.debuggeando_ideas.best_travel.api.controllers;
 import com.debuggeando_ideas.best_travel.api.models.reponses.TicketResponse;
 import com.debuggeando_ideas.best_travel.api.models.requests.TicketRequest;
 import com.debuggeando_ideas.best_travel.infraestructure.abstract_services.ITicketService;
+import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -21,7 +22,7 @@ public class TicketController {
     // ResponseEntity : Es el objeto spring que se encarga de responder el status http, headers, etc.
     // Recomendado usarlo al exponer un servicio en Spring.
     @PostMapping
-    public ResponseEntity<TicketResponse> post(@RequestBody TicketRequest ticketRequest) {
+    public ResponseEntity<TicketResponse> post(@Valid @RequestBody TicketRequest ticketRequest) {
         return ResponseEntity.ok(ticketService.create(ticketRequest));
     }
 
@@ -31,7 +32,7 @@ public class TicketController {
     }
 
     @PutMapping(path = "{id}")
-    public ResponseEntity<TicketResponse> put(@PathVariable UUID id, @RequestBody TicketRequest ticketRequest) {
+    public ResponseEntity<TicketResponse> put(@PathVariable UUID id, @Valid @RequestBody TicketRequest ticketRequest) {
         return ResponseEntity.ok(ticketService.update(ticketRequest, id));
     }
 
