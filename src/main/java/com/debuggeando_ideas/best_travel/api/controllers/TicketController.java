@@ -11,18 +11,19 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
-import java.util.Collections;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 @RestController
 @AllArgsConstructor
 @RequestMapping(path = "ticket")
-@Tag(name = "Ticket") // Anotación de OpenApi-Swagger para modificar el subtítulo de este controlador en la interfaz gráfica.
+@Tag(name = "Ticket")
+// Anotación de OpenApi-Swagger para modificar el subtítulo de este controlador en la interfaz gráfica.
 public class TicketController {
     private final ITicketService ticketService;
 
@@ -46,7 +47,8 @@ public class TicketController {
     @Operation(summary = "Save in system un ticket with the fly passed in parameter")
     @PostMapping
     public ResponseEntity<TicketResponse> post(@Valid @RequestBody TicketRequest ticketRequest) {
-        return ResponseEntity.ok(ticketService.create(ticketRequest));
+//        return ResponseEntity.ok(ticketService.create(ticketRequest));
+        return ResponseEntity.status(HttpStatus.CREATED).body(ticketService.create(ticketRequest));
     }
 
     @Operation(summary = "Return a ticket with id passed")
@@ -58,7 +60,8 @@ public class TicketController {
     @Operation(summary = "Update a ticket")
     @PutMapping(path = "{id}")
     public ResponseEntity<TicketResponse> put(@PathVariable UUID id, @Valid @RequestBody TicketRequest ticketRequest) {
-        return ResponseEntity.ok(ticketService.update(ticketRequest, id));
+//        return ResponseEntity.ok(ticketService.update(ticketRequest, id));
+        return ResponseEntity.status(HttpStatus.CREATED).body(ticketService.update(ticketRequest, id));
     }
 
     @Operation(summary = "Delete a ticket with id passed")
@@ -70,8 +73,13 @@ public class TicketController {
 
     @Operation(summary = "Return a ticket price given a fly id")
     @GetMapping
-    public ResponseEntity<Map<String, BigDecimal>> getTicketPrice(@RequestParam Long flyId) {
+    public ResponseEntity<Map<String, BigDecimal>> getTicketPrice(
+            @RequestParam Long flyId,
+            @RequestHeader(required = false) Currency currency) {
+        if (Objects.isNull(currency)) {
+            currency = Currency.getInstance("USD");
+        }
         // singletonMap : método que permite enviar un "Map", de un solo elemento, indicando su key-value
-        return ResponseEntity.ok(Collections.singletonMap("TicketPrice", ticketService.findPrice(flyId)));
+        return ResponseEntity.ok(Collections.singletonMap("TicketPrice", ticketService.findPrice(flyId, currency)));
     }
 }

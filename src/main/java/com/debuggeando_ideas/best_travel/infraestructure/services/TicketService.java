@@ -8,6 +8,7 @@ import com.debuggeando_ideas.best_travel.domain.repositories.CustomerRepository;
 import com.debuggeando_ideas.best_travel.domain.repositories.FlyRepository;
 import com.debuggeando_ideas.best_travel.domain.repositories.TicketRepository;
 import com.debuggeando_ideas.best_travel.infraestructure.abstract_services.ITicketService;
+import com.debuggeando_ideas.best_travel.infraestructure.helpers.ApiCurrencyConnectorHelper;
 import com.debuggeando_ideas.best_travel.infraestructure.helpers.BlackListHelper;
 import com.debuggeando_ideas.best_travel.infraestructure.helpers.CustomerHelper;
 import com.debuggeando_ideas.best_travel.util.BestTravelUtil;
@@ -21,6 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.Currency;
 import java.util.UUID;
 
 @Transactional
@@ -34,6 +36,7 @@ public class TicketService implements ITicketService {
     private final TicketRepository ticketRepository;
     private final CustomerHelper customerHelper;
     private final BlackListHelper blackListHelper;
+    private final ApiCurrencyConnectorHelper currencyConnectorHelper;
 
     @Override
     public TicketResponse create(TicketRequest request) {
@@ -100,9 +103,19 @@ public class TicketService implements ITicketService {
     }
 
     @Override
-    public BigDecimal findPrice(Long flyId) {
+    public BigDecimal findPrice(Long flyId, Currency currency) {
         var fly = flyRepository.findById(flyId).orElseThrow(() -> new IdNotFoundException(Tables.fly.name()));
-        return fly.getPrice().add(fly.getPrice().multiply(charge_price_percentage)); // Asignamos el 25% adicional del precio del vuelo
+
+        var priceInDollars = fly.getPrice().add(fly.getPrice().multiply(charge_price_percentage)); // Asignamos el 25% adicional del precio del vuelo
+        // validación del parámetro "currency" ya que es opcional. Lo devolveremos en dólares en caso no llegue este parámetro.
+        if (currency.equals(Currency.getInstance("USD"))) {
+            return priceInDollars;
+        }
+        // Obtenemos la respuesta de nuestro "web client" enviando el parámetro obtenido
+        var currencyDTO = this.currencyConnectorHelper.getCurrency(currency);
+        log.info("API currency in {}, response: {}", currencyDTO.getExchangeDate().toString(), currencyDTO.getRates());
+        // Retornamos el precio en dólares multiplicado por el valor obtenido del mapa, cuyo "key" será el parámetro "currency"
+        return priceInDollars.multiply(currencyDTO.getRates().get(currency));
     }
 
     // Método encargado de mapear las entidades a un DTO response("TicketEntity" a "TicketResponse")

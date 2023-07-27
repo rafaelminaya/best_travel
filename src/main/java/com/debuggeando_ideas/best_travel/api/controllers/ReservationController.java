@@ -11,18 +11,18 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
-import java.util.Collections;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 @RestController
 @AllArgsConstructor
 @RequestMapping(path = "reservation")
-@Tag(name = "Reservation") // Anotación de OpenApi-Swagger para modificar el subtítulo de este controlador en la interfaz gráfica.
+@Tag(name = "Reservation")
+// Anotación de OpenApi-Swagger para modificar el subtítulo de este controlador en la interfaz gráfica.
 public class ReservationController {
     private final IReservationService reservationService;
 
@@ -43,8 +43,9 @@ public class ReservationController {
     )
     @Operation(summary = "Save in system a reservation with the hotel passed in parameter")
     @PostMapping
-    public ResponseEntity<ReservationResponse> post(@Valid @RequestBody ReservationRequest reservationRequest){
-        return ResponseEntity.ok(reservationService.create(reservationRequest));
+    public ResponseEntity<ReservationResponse> post(@Valid @RequestBody ReservationRequest reservationRequest) {
+//        return ResponseEntity.ok(reservationService.create(reservationRequest));
+        return ResponseEntity.status(HttpStatus.CREATED).body(reservationService.create(reservationRequest));
     }
 
     @Operation(summary = "Return a reservation with id passed")
@@ -56,7 +57,8 @@ public class ReservationController {
     @Operation(summary = "Update a reservation")
     @PutMapping(path = "{id}")
     public ResponseEntity<ReservationResponse> put(@PathVariable UUID id, @Valid @RequestBody ReservationRequest reservationRequest) {
-        return ResponseEntity.ok(reservationService.update(reservationRequest, id));
+//        return ResponseEntity.ok(reservationService.update(reservationRequest, id));
+        return ResponseEntity.status(HttpStatus.CREATED).body(reservationService.update(reservationRequest, id));
     }
 
     @Operation(summary = "Delete a reservation with id passed")
@@ -68,8 +70,13 @@ public class ReservationController {
 
     @Operation(summary = "Return a reservation price given a hotel id")
     @GetMapping
-    public ResponseEntity<Map<String, BigDecimal>> getReservationPrice(@RequestParam Long hotelId) {
+    public ResponseEntity<Map<String, BigDecimal>> getReservationPrice(
+            @RequestParam Long hotelId,
+            @RequestHeader(required = false) Currency currency) {
+        if (Objects.isNull(currency)) {
+            currency = Currency.getInstance("USD");
+        }
         // singletonMap : método que permite enviar un "Map", de un solo elemento, indicando su key-value
-        return ResponseEntity.ok(Collections.singletonMap("ReservationPrice", reservationService.findPrice(hotelId)));
+        return ResponseEntity.ok(Collections.singletonMap("ReservationPrice", reservationService.findPrice(hotelId, currency)));
     }
 }

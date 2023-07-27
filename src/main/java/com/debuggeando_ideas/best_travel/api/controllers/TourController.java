@@ -11,6 +11,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -21,9 +22,11 @@ import java.util.UUID;
 @RestController
 @AllArgsConstructor
 @RequestMapping(path = "tour")
-@Tag(name = "Tour") // Anotación de OpenApi-Swagger para modificar el subtítulo de este controlador en la interfaz gráfica.
+@Tag(name = "Tour")
+// Anotación de OpenApi-Swagger para modificar el subtítulo de este controlador en la interfaz gráfica.
 public class TourController {
     private final TourService tourService;
+
     /*
     - @ApiResponse :
     * Anotación de OpenApi-Swagger para indicar qué devolver al obtener un error
@@ -43,7 +46,8 @@ public class TourController {
     @PostMapping
     public ResponseEntity<TourResponse> post(@Valid @RequestBody TourRequest tourRequest) {
         System.out.println(tourService.getClass().getSimpleName());
-        return ResponseEntity.ok(tourService.create(tourRequest));
+//        return ResponseEntity.ok(tourService.create(tourRequest));
+        return ResponseEntity.status(HttpStatus.CREATED).body(tourService.create(tourRequest));
     }
 
     @Operation(summary = "Return a Tour with id passed")

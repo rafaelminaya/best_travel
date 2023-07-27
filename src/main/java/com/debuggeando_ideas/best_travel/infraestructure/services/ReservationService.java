@@ -8,6 +8,7 @@ import com.debuggeando_ideas.best_travel.domain.repositories.CustomerRepository;
 import com.debuggeando_ideas.best_travel.domain.repositories.HotelRepository;
 import com.debuggeando_ideas.best_travel.domain.repositories.ReservationRepository;
 import com.debuggeando_ideas.best_travel.infraestructure.abstract_services.IReservationService;
+import com.debuggeando_ideas.best_travel.infraestructure.helpers.ApiCurrencyConnectorHelper;
 import com.debuggeando_ideas.best_travel.infraestructure.helpers.BlackListHelper;
 import com.debuggeando_ideas.best_travel.infraestructure.helpers.CustomerHelper;
 import com.debuggeando_ideas.best_travel.util.enums.Tables;
@@ -21,6 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Currency;
 import java.util.UUID;
 
 @Transactional
@@ -34,6 +36,7 @@ public class ReservationService implements IReservationService {
     private final ReservationRepository reservationRepository;
     private final CustomerHelper customerHelper;
     private final BlackListHelper blackListHelper;
+    private final ApiCurrencyConnectorHelper currencyConnectorHelper;
 
     @Override
     public ReservationResponse create(ReservationRequest request) {
@@ -97,6 +100,22 @@ public class ReservationService implements IReservationService {
         reservationRepository.delete(reservationToDelete);
     }
 
+    @Override
+    public BigDecimal findPrice(Long hotelId, Currency currency) {
+        var hotel = hotelRepository.findById(hotelId).orElseThrow(() -> new IdNotFoundException(Tables.hotel.name()));
+        var priceInDollars = hotel.getPrice().add(hotel.getPrice().multiply(charge_price_percentage));
+
+        // validación del parámetro "currency" ya que es opcional. Lo devolveremos en dólares en caso no llegue este parámetro.
+        if (currency.equals(Currency.getInstance("USD"))) {
+            return priceInDollars;
+        }
+        // Obtenemos la respuesta de nuestro "web client" enviando el parámetro obtenido
+        var currencyDTO = this.currencyConnectorHelper.getCurrency(currency);
+        log.info("API currency in {}, response: {}", currencyDTO.getExchangeDate().toString(), currencyDTO.getRates());
+        // Retornamos el precio en dólares multiplicado por el valor obtenido del mapa, cuyo "key" será el parámetro "currency"
+        return priceInDollars.multiply(currencyDTO.getRates().get(currency));
+    }
+
     // Método encargado de mapear las entidades a un DTO response("ReservationEntity" a "ReservationResponse")
     private ReservationResponse entityToResponse(ReservationEntity reservationEntity) {
         var reservationResponse = new ReservationResponse();
@@ -116,13 +135,6 @@ public class ReservationService implements IReservationService {
         reservationResponse.setHotel(hotelResponse);
 
         return reservationResponse;
-    }
-
-    @Override
-    public BigDecimal findPrice(Long hotelId) {
-        var hotel = hotelRepository.findById(hotelId).orElseThrow(() -> new IdNotFoundException(Tables.hotel.name()));
-
-        return hotel.getPrice().add(hotel.getPrice().multiply(charge_price_percentage));
     }
 
     public static final BigDecimal charge_price_percentage = BigDecimal.valueOf(0.20);
