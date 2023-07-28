@@ -12,6 +12,7 @@ import com.debuggeando_ideas.best_travel.domain.repositories.TourRepository;
 import com.debuggeando_ideas.best_travel.infraestructure.abstract_services.ITourService;
 import com.debuggeando_ideas.best_travel.infraestructure.helpers.BlackListHelper;
 import com.debuggeando_ideas.best_travel.infraestructure.helpers.CustomerHelper;
+import com.debuggeando_ideas.best_travel.infraestructure.helpers.EmailHelper;
 import com.debuggeando_ideas.best_travel.infraestructure.helpers.TourHelper;
 import com.debuggeando_ideas.best_travel.util.enums.Tables;
 import com.debuggeando_ideas.best_travel.util.exceptions.IdNotFoundException;
@@ -22,6 +23,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -38,6 +40,7 @@ public class TourService implements ITourService {
     private final TourHelper tourHelper;
     private final CustomerHelper customerHelper;
     private final BlackListHelper blackListHelper;
+    private final EmailHelper emailHelper;
 
     @Override
     public TourResponse create(TourRequest request) {
@@ -66,6 +69,11 @@ public class TourService implements ITourService {
         var tourSaved = tourRepository.save(tourToSave);
         // invocamos al método que actualiza los totales de "fly", "reservations" y "tours" del customer
         customerHelper.increase(customer.getDni(), TourService.class);
+        // validación en caso el email del parámetro obtenido no sea null.
+        if (Objects.nonNull(request.getEmail())) {
+            // Invocamos a la función que envía el email
+            this.emailHelper.sendMail(request.getEmail(), customer.getFullName(), Tables.tour.name());
+        }
         // Instanciaremos y devolveremos el "TourResponse" a partir del "tour" creado.
         return TourResponse.builder()
                 .id(tourSaved.getId())

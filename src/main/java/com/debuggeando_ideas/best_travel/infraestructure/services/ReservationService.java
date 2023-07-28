@@ -11,11 +11,13 @@ import com.debuggeando_ideas.best_travel.infraestructure.abstract_services.IRese
 import com.debuggeando_ideas.best_travel.infraestructure.helpers.ApiCurrencyConnectorHelper;
 import com.debuggeando_ideas.best_travel.infraestructure.helpers.BlackListHelper;
 import com.debuggeando_ideas.best_travel.infraestructure.helpers.CustomerHelper;
+import com.debuggeando_ideas.best_travel.infraestructure.helpers.EmailHelper;
 import com.debuggeando_ideas.best_travel.util.enums.Tables;
 import com.debuggeando_ideas.best_travel.util.exceptions.IdNotFoundException;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,6 +25,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Currency;
+import java.util.Objects;
 import java.util.UUID;
 
 @Transactional
@@ -37,6 +40,7 @@ public class ReservationService implements IReservationService {
     private final CustomerHelper customerHelper;
     private final BlackListHelper blackListHelper;
     private final ApiCurrencyConnectorHelper currencyConnectorHelper;
+    private final EmailHelper emailHelper;
 
     @Override
     public ReservationResponse create(ReservationRequest request) {
@@ -59,6 +63,11 @@ public class ReservationService implements IReservationService {
         var reservationPersisted = reservationRepository.save(reservationToPersist);
         // invocamos al método que actualiza los totales de "fly", "reservations" y "tours" del customer
         customerHelper.increase(customer.getDni(), ReservationService.class);
+        // validación en caso el email del parámetro obtenido no sea null.
+        if (Objects.nonNull(request.getEmail())) {
+            // Invocamos a la función que envía el email
+            this.emailHelper.sendMail(request.getEmail(), customer.getFullName(), Tables.reservation.name());
+        }
 
         return this.entityToResponse(reservationPersisted);
     }

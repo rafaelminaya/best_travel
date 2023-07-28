@@ -11,6 +11,7 @@ import com.debuggeando_ideas.best_travel.infraestructure.abstract_services.ITick
 import com.debuggeando_ideas.best_travel.infraestructure.helpers.ApiCurrencyConnectorHelper;
 import com.debuggeando_ideas.best_travel.infraestructure.helpers.BlackListHelper;
 import com.debuggeando_ideas.best_travel.infraestructure.helpers.CustomerHelper;
+import com.debuggeando_ideas.best_travel.infraestructure.helpers.EmailHelper;
 import com.debuggeando_ideas.best_travel.util.BestTravelUtil;
 import com.debuggeando_ideas.best_travel.util.enums.Tables;
 import com.debuggeando_ideas.best_travel.util.exceptions.IdNotFoundException;
@@ -23,6 +24,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Currency;
+import java.util.Objects;
 import java.util.UUID;
 
 @Transactional
@@ -37,6 +39,7 @@ public class TicketService implements ITicketService {
     private final CustomerHelper customerHelper;
     private final BlackListHelper blackListHelper;
     private final ApiCurrencyConnectorHelper currencyConnectorHelper;
+    private final EmailHelper emailHelper;
 
     @Override
     public TicketResponse create(TicketRequest request) {
@@ -63,6 +66,11 @@ public class TicketService implements ITicketService {
         log.info("Ticket saved with id: {}", ticketPersisted.getId());
         // invocamos al método que actualiza los totales de "fly", "reservations" y "tours" del customer
         customerHelper.increase(customer.getDni(), TicketService.class);
+        // validación en caso el email del parámetro obtenido no sea null.
+        if (Objects.nonNull(request.getEmail())) {
+            // Invocamos a la función que envía el email
+            this.emailHelper.sendMail(request.getEmail(), customer.getFullName(), Tables.ticket.name());
+        }
         // retornamos el ticket persistido mapeado en un DTO "TicketResponse"
         return this.entityToResponse(ticketPersisted);
     }
