@@ -75,6 +75,18 @@
 			<artifactId>poi-ooxml</artifactId>
 			<version>5.2.3</version>
 		</dependency>
+		<!-- Dependencias para el uso de Spring con Redis -->
+		<!-- Dependencia para el uso de cache en memoria con Spring, esto solo debe usar con con un servidor especializado en cache, por ejemplo Redis -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-cache</artifactId>
+		</dependency>
+		<!-- Dependencia para integrar las anotaciones de la dependencia previa(spring-boot-starter-cache) que usa el cache con Spring, con un servidor remoto de "Redis Cache" -->
+		<dependency>
+			<groupId>org.redisson</groupId>
+			<artifactId>redisson</artifactId>
+			<version>3.18.1</version>
+		</dependency>
 	</dependencies>
 
 	<build>

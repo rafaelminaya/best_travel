@@ -11,7 +11,7 @@ import java.io.Serializable;
 @NoArgsConstructor
 @AllArgsConstructor
 @Data
-@SuperBuilder // usamos esta anotación, en reemplazo del "@Builder" debido a que es clase será heredada
+@SuperBuilder // usamos esta anotación, en reemplazo del "@Builder" debido a que esta clase será heredada
 public class BaseErrorResponse implements Serializable {
     private String status;
     private Integer code;

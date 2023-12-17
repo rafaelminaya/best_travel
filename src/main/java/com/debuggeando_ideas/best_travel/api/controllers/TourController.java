@@ -66,7 +66,7 @@ public class TourController {
     @Operation(summary = "Add a ticket from tour")
     @PatchMapping(path = "{tourId}/add_ticket/{flyId}")
     public ResponseEntity<Map<String, UUID>> postTicket(@PathVariable Long tourId, @PathVariable Long flyId) {
-        // singletonMap : método que permite enviar un "Map", de un solo elemento, indicando su key-value
+        // singletonMap : Método que permite enviar un "Map", de un solo elemento, indicando su key-value
         var response = Collections.singletonMap("ticketId", tourService.addTicket(tourId, flyId));
         return ResponseEntity.ok(response);
     }
@@ -84,8 +84,8 @@ public class TourController {
             @PathVariable Long tourId,
             @PathVariable Long hotelId,
             @RequestParam Integer totalDays) {
-        // singletonMap : método que permite enviar un "Map", de un solo elemento, indicando su key-value
-        var response = Collections.singletonMap("ticketId", tourService.addReservation(tourId, hotelId, totalDays));
+        // singletonMap : Método que permite enviar un "Map", de un solo elemento, indicando su key-value
+        var response = Collections.singletonMap("reservationId", tourService.addReservation(tourId, hotelId, totalDays));
         return ResponseEntity.ok(response);
     }
 
