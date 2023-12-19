@@ -1,6 +1,5 @@
 package com.debuggeando_ideas.best_travel.api.models.reponses;
 
-import com.debuggeando_ideas.best_travel.domain.entities.HotelEntity;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;
 import lombok.Builder;

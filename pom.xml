@@ -87,6 +87,13 @@
 			<artifactId>redisson</artifactId>
 			<version>3.18.1</version>
 		</dependency>
+		<!-- Dependencia del driver para el uso del ORM de MongoDB -->
+		<!-- Esta es la dependencia normal de MongoDB, ya que hay otra que es la reactiva -->
+		<!-- Usaremos la dependencia normal ya que nuestra aplicación no es reactiva(a pesar que sí usamos webflux aunque es solo para algo específico) -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-data-mongodb</artifactId>
+		</dependency>
 	</dependencies>
 
 	<build>

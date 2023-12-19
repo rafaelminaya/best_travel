@@ -1,6 +1,6 @@
 package com.debuggeando_ideas.best_travel.infraestructure.helpers;
 
-import com.debuggeando_ideas.best_travel.domain.repositories.CustomerRepository;
+import com.debuggeando_ideas.best_travel.domain.repositories.jpa.CustomerRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;

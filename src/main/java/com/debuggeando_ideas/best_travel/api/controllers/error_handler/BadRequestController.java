@@ -4,6 +4,7 @@ import com.debuggeando_ideas.best_travel.api.models.reponses.BaseErrorResponse;
 import com.debuggeando_ideas.best_travel.api.models.reponses.ErrorResponse;
 import com.debuggeando_ideas.best_travel.api.models.reponses.ErrorsResponse;
 import com.debuggeando_ideas.best_travel.util.exceptions.IdNotFoundException;
+import com.debuggeando_ideas.best_travel.util.exceptions.UsernameNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -23,10 +24,12 @@ import java.util.ArrayList;
 @ResponseStatus(HttpStatus.BAD_REQUEST) // especifica que este controlador siempre lanzará el status 400 - Bad Request
 public class BadRequestController {
 
-    // Método que se invocará al lanzarse una excepción "IdNotFoundException".
+    // Método que se invocará al lanzarse una excepción "IdNotFoundException" o "UsernameNotFoundException"
     // Es decir, un id buscado que no sea encuentre en la BD.
-    @ExceptionHandler(IdNotFoundException.class) // anotación que intercepta la excepción indicada
-    public BaseErrorResponse handleIdNotFound(IdNotFoundException exception) {
+    // La excepción controlada por la firma será "RuntimeException" puesto que es el padre"IdNotFoundException" y "UsernameNotFoundException".
+    // En caso de tener solo controlar 1 excepción, por ejemplo "IdNotFoundException", se deberá poner esta en reemplazo de "RuntimeException"
+    @ExceptionHandler({IdNotFoundException.class, UsernameNotFoundException.class}) // anotación que intercepta la excepción indicada
+    public BaseErrorResponse handleIdNotFound(RuntimeException exception) {
         // Devolvemos una instancia de "ErrorResponse", con los atributos para la clase padre e hijo
         // "ErrorResponse" es hijo de la clase "BaseErrorResponse" a retornar.
         return ErrorResponse.builder()

@@ -2,7 +2,7 @@ version: '3'
 # Definimos los servicios/container para el PostgreSQL y Redis.
 services:
   # 1°) Servicio para el PostgreSQL
-  db:
+  sql-db:
     image: postgres:15.2
     container_name: postgre-best-travel
     restart: always
@@ -17,7 +17,7 @@ services:
     ports:
       - "5433:5432"
   # 2°) Servicio para el servidor Redis
-  cache:
+  cache-db:
     image: redis:6.2-alpine
     container_name: best_travel_cache
     restart: always
@@ -25,3 +25,18 @@ services:
      - "6379:6379"
      # Asignamos el nivel del logging como warning y la palabra "debuggeandoideas" como el password al servidor
     command: redis-server --loglevel warning --requirepass debuggeandoideas
+  # 2°) Servicio para el MongoDB
+  document-db:
+    image: mongo:6.0.4
+    restart: always
+    container_name: best_travel_users
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: master
+      MONGO_INITDB_ROOT_PASSWORD: debuggeandoideas
+      # Esta variable de entorno permite crear inmediatamente una base de datos al iniciarse el container.
+      # Se debe indicar el script de la base de datos y asignarla al volumen del container "/docker-entrypoint-initdb"
+      MONGO_INITDB_DATABASE: users
+    ports:
+      - "27019:27017"
+    volumes:
+      - ./db/mongo/init-mongo.js:/docker-entrypoint-initdb.d/init-mongo.js:ro

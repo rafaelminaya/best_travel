@@ -1,8 +1,8 @@
 package com.debuggeando_ideas.best_travel.infraestructure.services;
 
 import com.debuggeando_ideas.best_travel.api.models.reponses.FlyResponse;
-import com.debuggeando_ideas.best_travel.domain.entities.FlyEntity;
-import com.debuggeando_ideas.best_travel.domain.repositories.FlyRepository;
+import com.debuggeando_ideas.best_travel.domain.entities.jpa.FlyEntity;
+import com.debuggeando_ideas.best_travel.domain.repositories.jpa.FlyRepository;
 import com.debuggeando_ideas.best_travel.infraestructure.abstract_services.IFlyService;
 import com.debuggeando_ideas.best_travel.util.constants.CacheConstants;
 import com.debuggeando_ideas.best_travel.util.enums.SortType;
