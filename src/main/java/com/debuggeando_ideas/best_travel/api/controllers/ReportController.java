@@ -8,6 +8,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -24,9 +25,11 @@ public class ReportController {
     // El tipo a retornar será un tipo "Resource" del package "org.springframework.core.io.Resource"
     @GetMapping
     public ResponseEntity<Resource> get() {
+        // Obtenemos e imprimimos los "authority"/"scope" del recurso del endpoint actual
+        var authentication = SecurityContextHolder.getContext().getAuthentication();
+        System.out.println("Authorities from ReportController: " + authentication.getAuthorities());
         // creamos unos headers, ya que este archivo no lo leeremo por postman sino que lo descargaremos desde un navegador.
         var headers = new HttpHeaders();
-
         // especificamos el "content type" del header"
         headers.setContentType(FORCE_DOWNLOAD);
         // especificamos el "header" como tal

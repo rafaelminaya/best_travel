@@ -28,7 +28,7 @@ public class FlyService implements IFlyService {
     @Override
     public Page<FlyResponse> readAll(Integer page, Integer size, SortType sortType) {
         PageRequest pageRequest = null;
-        // Retorna la paginación según el parámetro "sortType" en cualera de sus 3 posibles valores
+        // Retorna la paginación según el parámetro "sortType" en cualquiera de sus 3 posibles valores
         switch (sortType) {
             case NONE -> pageRequest = PageRequest.of(page, size);
             case LOWER -> pageRequest = PageRequest.of(page, size, Sort.by(FIELD_BY_SORT).ascending());

@@ -8,6 +8,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
@@ -17,7 +18,7 @@ import java.util.Set;
 @RestController
 @AllArgsConstructor
 @RequestMapping(path = "fly")
-@Tag(name = "Fly") // Anotación de OpenApi-Swagger para modificar el subtítulo de este controlador en la interfaz gráfica.
+@Tag(name = "Fly")// Anotación de OpenApi-Swagger para modificar el subtítulo de este controlador en la interfaz gráfica.
 public class FlyController {
 
     private final IFlyService flyService;
@@ -33,6 +34,11 @@ public class FlyController {
             @RequestParam Integer page,
             @RequestParam Integer size,
             @RequestHeader(required = false) SortType sortType) {
+
+        // Obtenemos e imprimimos los "authority"/"scope" del recurso del endpoint actual
+        var authentication = SecurityContextHolder.getContext().getAuthentication();
+        System.out.println("Authorities from FlyController: " + authentication.getAuthorities());
+
         // Asignamos el enumerador "NONE" en caso no se reciba el parámetro "sortType" (LOWER, UPPPER, NONE)
         if (Objects.isNull(sortType)) {
             sortType = SortType.NONE;

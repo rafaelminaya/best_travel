@@ -13,6 +13,7 @@ import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
@@ -21,8 +22,7 @@ import java.util.*;
 @RestController
 @AllArgsConstructor
 @RequestMapping(path = "ticket")
-@Tag(name = "Ticket")
-// Anotación de OpenApi-Swagger para modificar el subtítulo de este controlador en la interfaz gráfica.
+@Tag(name = "Ticket")// Anotación de OpenApi-Swagger para modificar el subtítulo de este controlador en la interfaz gráfica.
 public class TicketController {
     private final ITicketService ticketService;
 
@@ -46,6 +46,9 @@ public class TicketController {
     @Operation(summary = "Save in system un ticket with the fly passed in parameter")
     @PostMapping
     public ResponseEntity<TicketResponse> post(@Valid @RequestBody TicketRequest ticketRequest) {
+        // Obtenemos e imprimimos los "authority"/"scope" del recurso del endpoint actual
+        var authentication = SecurityContextHolder.getContext().getAuthentication();
+        System.out.println("Authorities from TicketController: " + authentication.getAuthorities());
 //        return ResponseEntity.ok(ticketService.create(ticketRequest));
         return ResponseEntity.status(HttpStatus.CREATED).body(ticketService.create(ticketRequest));
     }
