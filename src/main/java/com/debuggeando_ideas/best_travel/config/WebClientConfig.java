@@ -5,8 +5,13 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.reactive.function.client.WebClient;
 
-// Esta clase configurará los valores para el uso de un "web client"
-// @Configuration: Permite cargar el archivo y registrar los métodos anotados con "@Bean" al "contenedor de spring"
+/*
+ * Esta clase configurará los valores para el uso de un "web client".
+ * Esto por medio de la interfaz "WebClient" que usa programación reactiva y de la dependencia WebFlux
+ *
+ * @Configuration
+ * Permite cargar el archivo y registrar los métodos anotados con "@Bean" al "contenedor de spring"
+ */
 @Configuration
 public class WebClientConfig {
     // Con "@Value" hacemos una inyección de dependencias para darle los valores desde un archivo ".properties".
@@ -18,17 +23,19 @@ public class WebClientConfig {
     private String apiKeyHeader;
 
     /*
-    - Creamos un "web client" que utilizaremos para el API de Currency.
-    - Anotamos con "@Bean" para registrarlo en el "contenedor de spring" y luego poder inyectarlo como dependencia.
-    - La interfaz "WebClient", por la instalación de la dependencia de "WebFlux", podremos importarla
-    de "org.springframework.web.reactive.function.client.WebClient;"
+     * Creamos un "web client" que utilizaremos para el API de Currency.
+     * Anotamos con "@Bean" para registrarlo en el "contenedor de spring" y luego poder inyectarlo como dependencia.
+     * La interfaz "WebClient", por la instalación de la dependencia de "WebFlux", podremos importarla
+     * de "org.springframework.web.reactive.function.client.WebClient;"
      */
     @Bean(name = "currency")
 //    @Primary
     public WebClient currencyWebClient() {
-        //return con la configuración base para el "web client".
-        // Solo usaremos el "web client" para el api de currency.
-        // Este método ".builder()" no es de lombok, sino propio del "WebClient"
+        /*
+         * El "return" contiene la configuración base para el "web client".
+         * Solo usaremos el "web client" para el api de currency.
+         * Este método ".builder()" no es de lombok, sino propio del "WebClient"
+         */
         return WebClient
                 .builder()
                 .baseUrl(this.baseUrl) // asignamos la url para el "web client"

@@ -61,9 +61,12 @@ public class SecurityConfig {
 
     private final UserDetailsService userDetailsService;
 
-    // Inyección de dependencias por constructor manual para indicar cuál es la implementación que se va a utilizar.
-    // Esto con el fin de evitar posibles errores ya que pueden haber varias implementaciones de "UserDetailsService".
-    // "AppUserService" es la clase que implementa a la interfaz "UserDetailsService"
+    /*
+     * Inyección de "dependencias por constructor" manual.
+     * Para poder escribir "@Qualifier" indicnado cuál es la clase de implementación que se va a utilizar.
+     * Esto con el fin de evitar posibles errores ya que pueden haber varias implementaciones de la interfaz "UserDetailsService"(propio de Spring Security=.
+     * "AppUserService" es nuestra clase personalizada que está implementando a la interfaz "UserDetailsService".
+     */
     public SecurityConfig(@Qualifier(value = "appUserService") UserDetailsService userDetailsService) {
         this.userDetailsService = userDetailsService;
     }
@@ -83,7 +86,9 @@ public class SecurityConfig {
         // Manejamos las excepciones, indicando la ruta del login a donde se redireccionará, representado por la constante "LOGIN_RESOURCE"
         httpSecurity
                 .exceptionHandling(exceptions -> exceptions
-                        .authenticationEntryPoint(new LoginUrlAuthenticationEntryPoint(LOGIN_RESOURCE))
+                        .authenticationEntryPoint(
+                                new LoginUrlAuthenticationEntryPoint(LOGIN_RESOURCE)
+                        )
                 );
 
         return httpSecurity.build();
@@ -111,11 +116,12 @@ public class SecurityConfig {
 
         return httpSecurity.build();
     }
-
-    // Método que configura cuál será nuestro "proveedor de autenticación". El argumento es una inyección de dependencias.
-    // Este método será instanciado y almacenado en el "contenedor de spring" puesto que su argumento "BCryptPasswordEncoder",
-    // ya es un bean del "contenedor de spring" (por estar anotado con "@Bean")
-    // Por lo que sería opcional anotar este método con "@Autowired" y en su lugar usaremos "@Bean"
+    /*
+     * Método que configura cuál será nuestro "proveedor de autenticación". El argumento es una inyección de dependencias.
+     * Este método será instanciado y almacenado en el "contenedor de spring" puesto que su argumento "BCryptPasswordEncoder",
+     * ya es un bean del "contenedor de spring" (por estar anotado con "@Bean").
+     * Por lo que sería opcional anotar este método con "@Autowired" y en su lugar usaremos "@Bean"
+     */
     @Bean
     public AuthenticationProvider authenticationProvider(BCryptPasswordEncoder encoder) {
         // Instancia del "proveedor de autenticación".
@@ -135,12 +141,13 @@ public class SecurityConfig {
                 .withId(UUID.randomUUID().toString())
                 .clientId(this.clientId) // asignamos un "client id"
                 .clientSecret(encoder.encode(this.clientSecret)) // asignamos el password del "client id"
-                .scope(this.scopeRead)
-                .scope(this.scopeWrite)
+                .clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_BASIC) // indicamos que la autenticación será con un "Basic Auth"
+                .authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE) // indicamos que nos autenticaremos por medio de un "código de autorización"
+                .authorizationGrantType(AuthorizationGrantType.REFRESH_TOKEN) // Esto permite recuperar un token existente cuando está a punto de caducar. Por default es cada 5 minutos.
                 .redirectUri(this.redirectUri1)
                 .redirectUri(this.redirectUri2)
-                .clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_BASIC) // indicamos que autenticación será con un "Basic Auth"
-                .authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE) // indicamos que nos autenticaremos por medio de un "código de autorización"
+                .scope(this.scopeRead)
+                .scope(this.scopeWrite)
                 .build();
         // Retornamos una clase que implementa la interfaz "RegisteredClientRepository" y cuyo argumento es del tipo "RegisteredClient"
         return new InMemoryRegisteredClientRepository(registeredClient);
@@ -151,7 +158,6 @@ public class SecurityConfig {
     public AuthorizationServerSettings authorizationServerSettings() {
         return AuthorizationServerSettings.builder().build();
     }
-
 
     @Bean
     public BCryptPasswordEncoder bCryptPasswordEncoder() {
@@ -173,7 +179,7 @@ public class SecurityConfig {
         RSAPublicKey publicKey = (RSAPublicKey) keyPair.getPublic(); // Genera automáticamente una llave RSA pública
         RSAPrivateKey privateKey = (RSAPrivateKey) keyPair.getPrivate(); // Genera automáticamente una llave RSA privada
         // Genera una llave RSA para firmar el JWT y es almacenada en el backend
-        // Para en el futuro validar que sea la firma correctode los JWT recibidos por el cliente.
+        // Para en el futuro validar que sea la firma correcta de los JWT recibidos por el cliente.
         RSAKey rsaKey = new RSAKey.Builder(publicKey)
                 .privateKey(privateKey)
                 .keyID(UUID.randomUUID().toString())
@@ -188,7 +194,7 @@ public class SecurityConfig {
     private static KeyPair generateRsaKey() {
         KeyPair keyPair;
         try {
-            KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("RSA"); // indicmos el algoritmo
+            KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("RSA"); // indicamos el algoritmo
             keyPairGenerator.initialize(2048); // 2048 es un protocolo estandarizado
             keyPair = keyPairGenerator.generateKeyPair();
         } catch (Exception ex) {
@@ -204,7 +210,7 @@ public class SecurityConfig {
     }
 
     // Método que personaliza un token. Removeremos el prefijo de "SCOPE_" que trae el "authority" por defecto.
-    // Necesita del métoodo "jwtAuthenticationConverter()", que está más abajo, para concretar la configuración.
+    // Necesita del método "jwtAuthenticationConverter()", que está más abajo, para concretar la configuración.
     @Bean
     public JwtGrantedAuthoritiesConverter jwtGrantedAuthoritiesConverter() {
         JwtGrantedAuthoritiesConverter converter = new JwtGrantedAuthoritiesConverter();

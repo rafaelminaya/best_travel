@@ -2,6 +2,7 @@ package com.debuggeando_ideas.best_travel.api.controllers;
 
 import com.debuggeando_ideas.best_travel.api.models.reponses.FlyResponse;
 import com.debuggeando_ideas.best_travel.infraestructure.abstract_services.IFlyService;
+import com.debuggeando_ideas.best_travel.util.annotations.Notify;
 import com.debuggeando_ideas.best_travel.util.enums.SortType;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -29,6 +30,7 @@ public class FlyController {
     - @Operation : Anotación propia de OpenApi-Swagger para añadir descripción de este controlador en la interfaz gráfica.
      */
     @Operation(summary = "Return a page with flights can be sorted or not")
+    @Notify(value = "GET fly") // Esta anotación trabaja con un aspecto (Spring AOP)
     @GetMapping
     public ResponseEntity<Page<FlyResponse>> getAll(
             @RequestParam Integer page,
